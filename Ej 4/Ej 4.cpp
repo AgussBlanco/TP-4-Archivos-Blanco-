@@ -17,6 +17,7 @@ void busquedaUsuarioDNI();
 void busquedaUsuarioNA();
 void validacionDNI(int dniTemp, bool *encontrado);
 void mostrarDatos(struct Usuario usuario);
+void mostrarUsuariosOrdenados();
 
 int main() {
     int opc = 0;
@@ -25,7 +26,7 @@ int main() {
     printf("Bienvenido\n");
 
     do {
-        printf("\nQue accion desea realizar:\n1. Ingresar a un usuario\n2. Buscar usuario por DNI\n3.Buscar usuario por nombre y apellido\n4. Salir\n");
+        printf("\nQue accion desea realizar:\n1. Ingresar a un usuario\n2. Buscar usuario por DNI\n3.Buscar usuario por nombre y apellido\n4. Mostrar todos los usuarios ordenados\n5. Salir\n");
         scanf("%d", &opc);
         getchar(); 
 
@@ -37,10 +38,13 @@ int main() {
             case 2:
                 busquedaUsuarioDNI();
                 break;
-			case 3:
-				busquedaUsuarioNA();
-				break;
+	    case 3:
+		busquedaUsuarioNA();
+		break;
             case 4:
+		mostrarUsuariosOrdenados();
+		break;
+            case 5:
                 printf("Saliendo...\n");
                 return 0;
 
@@ -203,4 +207,62 @@ void mostrarDatos(struct Usuario usuario){
 	}
 	}
 	while(seguir==true);
+}
+
+void mostrarUsuariosOrdenados() {
+    struct Usuario usuarios[100];
+    int cantidad = 0;
+    int opcionOrden;
+    int i,j;
+    FILE *archivo = fopen("usuarios.txt", "r");
+
+    if (archivo == NULL) {
+        printf("No se pudo abrir el archivo.\n");
+        return;
+    }
+
+    while (fread(&usuarios[cantidad], sizeof(struct Usuario), 1, archivo)) {
+        cantidad++;       
+    }
+    fclose(archivo);
+
+    if (cantidad == 0) {
+        printf("No hay usuarios para mostrar.\n");
+        return;
+    }
+
+    printf("Como desea ordenar los usuarios:\n1. Por Nombre (alfabetico)\n2. Por DNI (de menor a mayor)\n");
+    scanf("%d", &opcionOrden);
+    getchar();
+
+    if (opcionOrden == 1) {
+        for (i=0;i<cantidad - 1;i++) {
+            for (j=i + 1;j<cantidad;j++) {
+                if (strcmp(usuarios[i].Nombre, usuarios[j].Nombre)>0) {
+                    struct Usuario temp = usuarios[i];
+                    usuarios[i] = usuarios[j];
+                    usuarios[j] = temp;
+                }
+            }
+        }
+    } else if (opcionOrden == 2) {
+       
+        for (i=0;i<cantidad - 1;i++) {
+            for (j=i + 1;j<cantidad;j++) {
+                if (usuarios[i].DNI > usuarios[j].DNI) {
+                    struct Usuario temp = usuarios[i];
+                    usuarios[i] = usuarios[j];
+                    usuarios[j] = temp;
+                }
+            }
+        }
+    } else {
+        printf("Opcion no valida.\n");
+        return;
+    }
+
+    printf("\nUsuarios registrados:\n");
+    for (i=0;i<cantidad;i++) {
+        printf("Nombre: %s | Apellido: %s | DNI: %d\n", usuarios[i].Nombre, usuarios[i].Apellido, usuarios[i].DNI);
+    }
 }
